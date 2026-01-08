@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+
+#define WORD_LEN 5
+#define MAX_ATTEMPTS 6
+#define WORD_COUNT 15
+
+const char *words[WORD_COUNT] = {
+    "apple", "grape", "brick", "plane", "chair",
+    "smile", "flame", "pride", "clock", "stone",
+    "money", "beach", "light", "crown", "sound"
+};
+
+void toLower(char *s) {
+    for (int i = 0; s[i]; i++)
+        s[i] = tolower(s[i]);
+}
+
+void printFeedback(const char *guess, const char *answer) {
+    int used[WORD_LEN] = {0};
+    char result[WORD_LEN];
+
+    for (int i = 0; i < WORD_LEN; i++) {
+        if (guess[i] == answer[i]) {
+            result[i] = 'G';
+            used[i] = 1;
+        } else {
+            result[i] = ' ';
+        }
+    }
+
+    for (int i = 0; i < WORD_LEN; i++) {
+        if (result[i] == ' ') {
+            int found = 0;
+            for (int j = 0; j < WORD_LEN; j++) {
+                if (!used[j] && guess[i] == answer[j]) {
+                    found = 1;
+                    used[j] = 1;
+                    break;
+                }
+            }
+            result[i] = found ? 'Y' : 'X';
+        }
+    }
+
+    for (int i = 0; i < WORD_LEN; i++) {
+        if (result[i] == 'G')
+            printf("[G]%c ", guess[i]);
+        else if (result[i] == 'Y')
+            printf("[Y]%c ", guess[i]);
+        else
+            printf("[ ]%c ", guess[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    srand(time(NULL));
+    const char *answer = words[rand() % WORD_COUNT];
+
+    char guess[WORD_LEN + 1];
+    int attempts = 0;
+
+    printf("WORDLE GAME (C)\n");
+    printf("Guess the 5-letter word in %d attempts.\n\n", MAX_ATTEMPTS);
+
+    while (attempts < MAX_ATTEMPTS) {
+        printf("Attempt %d/%d: ", attempts + 1, MAX_ATTEMPTS);
+        scanf("%5s", guess);
+
+        if (strlen(guess) != WORD_LEN) {
+            printf("Enter exactly 5 letters.\n");
+            continue;
+        }
+
+        toLower(guess);
+        attempts++;
+
+        printFeedback(guess, answer);
+
+        if (strcmp(guess, answer) == 0) {
+            printf("\nYou won in %d attempts!\n", attempts);
+            return 0;
+        }
+    }
+
+    printf("\nGame Over! The word was: %s\n", answer);
+    return 0;
+}
